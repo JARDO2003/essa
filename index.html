@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Chatbot de Service</title>
+    <title>Commande de Taxi Moto</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,10 +27,11 @@
         }
         .chat-body {
             padding: 20px;
+            text-align: center;
         }
         .chat-body p {
             font-size: 18px;
-            margin: 0 0 20px 0;
+            margin-bottom: 20px;
         }
         .chat-options button, .footer button {
             display: block;
@@ -54,38 +55,105 @@
             background-color: #f9f9f9;
             border-top: 1px solid #ddd;
         }
+        /* Style de la modale */
+        .modal {
+            display: none; /* Cachée par défaut */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #shareLocationBtn {
+            display: none;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            <h2>Bienvenue dans notre Chatbot</h2>
+            <h2>Bienvenue dans notre service de Taxi Moto</h2>
         </div>
         <div class="chat-body">
             <p>Bonjour ! Comment pouvons-nous vous aider aujourd'hui ?</p>
             <div class="chat-options">
-                <button onclick="commanderTaxi()">Commander un Taxi Moto</button>
+                <button onclick="demanderLocalisation()">Commander un Taxi Moto</button>
             </div>
+            <button id="shareLocationBtn" onclick="partagerLocalisation()">Partager ma localisation</button>
         </div>
         <div class="footer">
             <button onclick="accederFournisseur()">Accéder à la page fournisseur</button>
         </div>
     </div>
 
+    <!-- Fenêtre modale -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Merci pour votre confiance !</h2>
+            <p>Un taxi viendra vous chercher dans quelques minutes.</p>
+        </div>
+    </div>
+
     <script>
-        function commanderTaxi() {
+        function demanderLocalisation() {
+            document.getElementById('shareLocationBtn').style.display = 'block';
+        }
+
+        function partagerLocalisation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
-                    alert("Un taxi viendra vous chercher dans quelques minutes.");
                     sessionStorage.setItem('clientLatitude', latitude);
                     sessionStorage.setItem('clientLongitude', longitude);
+                    afficherConfirmation();
                 }, function(error) {
                     alert("La géolocalisation a échoué. Veuillez vérifier vos paramètres.");
                 });
             } else {
                 alert("La géolocalisation n'est pas supportée par votre navigateur.");
+            }
+        }
+
+        function afficherConfirmation() {
+            const modal = document.getElementById("confirmationModal");
+            const span = document.getElementsByClassName("close")[0];
+            modal.style.display = "block";
+            span.onclick = function() {
+                modal.style.display = "none";
+            }
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
             }
         }
 
