@@ -1,152 +1,97 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Chatbot de Service</title>
-  <style>
-    body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f2f2f2;
-      margin: 0;
-      padding: 0;
-    }
-    .chat-container {
-      width: 100%;
-      max-width: 600px;
-      margin: 50px auto;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      overflow: hidden;
-    }
-    .chat-header {
-      background-color: #007BFF;
-      color: #fff;
-      padding: 20px;
-      text-align: center;
-    }
-    .chat-body {
-      padding: 20px;
-    }
-    .chat-body p {
-      font-size: 18px;
-      margin: 0 0 20px 0;
-    }
-    .chat-options button {
-      display: block;
-      width: 100%;
-      margin: 10px 0;
-      padding: 15px;
-      font-size: 16px;
-      background-color: #007BFF;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    .chat-options button:hover {
-      background-color: #0056b3;
-    }
-    .footer {
-      text-align: center;
-      padding: 20px;
-      background-color: #f9f9f9;
-      border-top: 1px solid #ddd;
-    }
-    .footer button {
-      padding: 10px 20px;
-      background-color: #28a745;
-      border: none;
-      border-radius: 5px;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    .footer button:hover {
-      background-color: #1e7e34;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Chatbot de Service</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .chat-header {
+            background-color: #007BFF;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        .chat-body {
+            padding: 20px;
+        }
+        .chat-body p {
+            font-size: 18px;
+            margin: 0 0 20px 0;
+        }
+        .chat-options button, .footer button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 15px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .chat-options button:hover, .footer button:hover {
+            background-color: #0056b3;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #ddd;
+        }
+    </style>
 </head>
 <body>
-  <div class="chat-container">
-    <div class="chat-header">
-      <h2>Bienvenue dans notre Chatbot</h2>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>Bienvenue dans notre Chatbot</h2>
+        </div>
+        <div class="chat-body">
+            <p>Bonjour ! Comment pouvons-nous vous aider aujourd'hui ?</p>
+            <div class="chat-options">
+                <button onclick="commanderTaxi()">Commander un Taxi Moto</button>
+            </div>
+        </div>
+        <div class="footer">
+            <button onclick="accederFournisseur()">Accéder à la page fournisseur</button>
+        </div>
     </div>
-    <div class="chat-body">
-      <p>Bonjour ! Comment pouvons-nous vous aider aujourd'hui ?</p>
-      <div class="chat-options">
-        <button onclick="selectOption('taxi')">Commander un Taxi Moto</button>
-        <button onclick="selectOption('eden')">Aller vers Eden Service</button>
-        <button onclick="selectOption('aide')">J'ai Besoin d'Aide</button>
-      </div>
-    </div>
-    <div class="footer">
-      <button onclick="goToFournisseur()">Accéder à la page fournisseur</button>
-    </div>
-  </div>
 
-  <script>
-    let userLatitude = null;
-    let userLongitude = null;
+    <script>
+        function commanderTaxi() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    alert("Un taxi viendra vous chercher dans quelques minutes.");
+                    sessionStorage.setItem('clientLatitude', latitude);
+                    sessionStorage.setItem('clientLongitude', longitude);
+                }, function(error) {
+                    alert("La géolocalisation a échoué. Veuillez vérifier vos paramètres.");
+                });
+            } else {
+                alert("La géolocalisation n'est pas supportée par votre navigateur.");
+            }
+        }
 
-    // Obtenir la position de l'utilisateur grâce à l'API de géolocalisation HTML5
-    function getLocation() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition, showError);
-      } else {
-        console.log("La géolocalisation n'est pas supportée par ce navigateur.");
-      }
-    }
-
-    function showPosition(position) {
-      userLatitude = position.coords.latitude;
-      userLongitude = position.coords.longitude;
-      console.log("Latitude: " + userLatitude + ", Longitude: " + userLongitude);
-    }
-
-    function showError(error) {
-      switch(error.code) {
-        case error.PERMISSION_DENIED:
-          console.log("L'utilisateur a refusé la demande de géolocalisation.");
-          break;
-        case error.POSITION_UNAVAILABLE:
-          console.log("Les informations de localisation ne sont pas disponibles.");
-          break;
-        case error.TIMEOUT:
-          console.log("La demande de géolocalisation a expiré.");
-          break;
-        case error.UNKNOWN_ERROR:
-          console.log("Une erreur inconnue est survenue.");
-          break;
-      }
-    }
-
-    // Gérer le clic sur une option du chatbot
-    function selectOption(option) {
-      let message = "";
-      if (option === "taxi") {
-        message = "Vous avez choisi de commander un taxi moto.";
-      } else if (option === "eden") {
-        message = "Vous avez choisi d'aller vers Eden Service.";
-      } else if (option === "aide") {
-        message = "Vous avez besoin d'aide, nous allons vous assister.";
-      }
-      alert(message);
-    }
-
-    // Rediriger vers la page fournisseur en transmettant les coordonnées via l'URL
-    function goToFournisseur() {
-      let url = "fournisseur.html";
-      if (userLatitude && userLongitude) {
-        url += "?lat=" + userLatitude + "&lon=" + userLongitude;
-      }
-      window.location.href = url;
-    }
-
-    // Lancer la géolocalisation dès le chargement de la page
-    window.onload = getLocation;
-  </script>
+        function accederFournisseur() {
+            window.location.href = 'fournisseur.html';
+        }
+    </script>
 </body>
 </html>
