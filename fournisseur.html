@@ -1,75 +1,77 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Fournisseur - Informations de Localisation</title>
-  <style>
-    body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #e9ecef;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    h2 {
-      color: #007BFF;
-    }
-    p {
-      font-size: 16px;
-      line-height: 1.6;
-    }
-    .back-button {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #007BFF;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-    }
-    .back-button:hover {
-      background-color: #0056b3;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Fournisseur - Position du Client</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e9ecef;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        h2 {
+            color: #007BFF;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .map-container {
+            margin: 20px 0;
+            height: 300px;
+            background-color: #ddd;
+        }
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Informations de Localisation du Client</h2>
-    <p id="locationInfo">Récupération de la localisation...</p>
-    <a href="index.html" class="back-button">Retour au Chatbot</a>
-  </div>
+    <div class="container">
+        <h2>Position du Client</h2>
+        <p id="locationInfo">Récupération de la localisation...</p>
+        <div id="map" class="map-container"></div>
+        <a id="openInMaps" href="#" class="button" target="_blank">Ouvrir dans Google Maps</a>
+    </div>
 
-  <script>
-    // Fonction pour extraire les paramètres de la query string
-    function getQueryParams() {
-      let params = {};
-      window.location.search.substring(1).split("&").forEach(function(pair) {
-        if (pair) {
-          let parts = pair.split("=");
-          params[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
-        }
-      });
-      return params;
-    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const latitude = sessionStorage.getItem('clientLatitude');
+            const longitude = sessionStorage.getItem('clientLongitude');
 
-    let params = getQueryParams();
-    let lat = params.lat;
-    let lon = params.lon;
-    let locationInfo = document.getElementById("locationInfo");
+            if (latitude && longitude) {
+                const locationInfo = document.getElementById('locationInfo');
+                locationInfo.textContent = `Latitude : ${latitude}, Longitude : ${longitude}`;
 
-    if (lat && lon) {
-      locationInfo.textContent = "Latitude : " + lat + " | Longitude : " + lon;
-    } else {
-      locationInfo.textContent = "Aucune information de localisation disponible.";
-    }
-  </script>
+                const map = document.getElementById('map');
+                const mapUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`;
+                map.innerHTML = `<iframe width="100%" height="100%" frameborder="0" style="border:0" src="${mapUrl}" allowfullscreen></iframe>`;
+
+                const openInMaps = document.getElementById('openInMaps');
+                openInMaps.href = `https://www.google.com/maps?q=${latitude},${longitude}`;
+            } else {
+                alert("Aucune position client disponible.");
+            }
+        });
+    </script>
 </body>
 </html>
