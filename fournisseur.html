@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fournisseur - Tableau de Bord</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .header {
+            background-color: #2196F3;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 15px;
+            background-color: #e1e1e1;
+            border: none;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+        }
+        .tab.active {
+            background-color: #2196F3;
+            color: white;
+        }
+        .requests-container {
+            margin-bottom: 20px;
+        }
+        .request-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            background-color: #f9f9f9;
+        }
+        .request-info {
+            flex: 1;
+        }
+        .request-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .map-container {
+            height: 400px;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .action-button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .accept {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .accept:hover {
+            background-color: #45a049;
+        }
+        .refuse {
+            background-color: #f44336;
+            color: white;
+        }
+        .refuse:hover {
+            background-color: #d32f2f;
+        }
+        .view {
+            background-color: #2196F3;
+            color: white;
+        }
+        .view:hover {
+            background-color: #0b7dda;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        .request-details {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>Tableau de Bord Fournisseur</h1>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="changeTab('new')">Nouvelles demandes</button>
+            <button class="tab" onclick="changeTab('active')">En cours</button>
+            <button class="tab" onclick="changeTab('history')">Historique</button>
+        </div>
+        
+        <div id="new-requests" class="requests-container">
+            <h2>Nouvelles demandes</h2>
+            <div id="requests-list">
+                <!-- Les demandes seront ajoutées dynamiquement ici -->
+                <div class="request-card">
+                    <div class="request-info">
+                        <h3>Demande de taxi #T12345</h3>
+                        <p><strong>Date:</strong> 06/04/2025 14:23</p>
+                        <p><strong>Localisation:</strong> Rue de Rivoli, Paris</p>
+                    </div>
+                    <div class="request-actions">
+                        <button class="action-button view" onclick="viewRequest('T12345')">Voir</button>
+                        <button class="action-button accept" onclick="acceptRequest('T12345')">Accepter</button>
+                        <button class="action-button refuse" onclick="refuseRequest('T12345')">Refuser</button>
+                    </div>
+                </div>
+                
+                <div class="request-card">
+                    <div class="request-info">
+                        <h3>Commande Eden #E54321</h3>
+                        <p><strong>Date:</strong> 06/04/2025 14:15</p>
+                        <p><strong>Localisation:</strong> Avenue des Champs-Élysées, Paris</p>
+                    </div>
+                    <div class="request-actions">
+                        <button class="action-button view" onclick="viewRequest('E54321')">Voir</button>
+                        <button class="action-button accept" onclick="acceptRequest('E54321')">Accepter</button>
+                        <button class="action-button refuse" onclick="refuseRequest('E54321')">Refuser</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="active-requests" class="requests-container" style="display: none;">
+            <h2>Demandes en cours</h2>
+            <div class="request-card">
+                <div class="request-info">
+                    <h3>Demande de taxi #T12340</h3>
+                    <p><strong>Date:</strong> 06/04/2025 14:00</p>
+                    <p><strong>Localisation:</strong> Boulevard Saint-Germain, Paris</p>
+                    <p><strong>Statut:</strong> <span style="color: #4CAF50;">En route</span></p>
+                </div>
+                <div class="request-actions">
+                    <button class="action-button view" onclick="viewRequest('T12340')">Voir</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="history-requests" class="requests-container" style="display: none;">
+            <h2>Historique des demandes</h2>
+            <div class="request-card">
+                <div class="request-info">
+                    <h3>Demande de taxi #T12330</h3>
+                    <p><strong>Date:</strong> 05/04/2025 18:45</p>
+                    <p><strong>Localisation:</strong> Rue de la Paix, Paris</p>
+                    <p><strong>Statut:</strong> <span style="color: #4CAF50;">Complétée</span></p>
+                </div>
+                <div class="request-actions">
+                    <button class="action-button view" onclick="viewRequest('T12330')">Voir</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="request-details" class="request-details">
+            <h2>Détails de la demande <span id="request-id"></span></h2>
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+            <div id="detail-content">
+                <!-- Les détails seront ajoutés ici -->
+            </div>
+            <button class="action-button" style="background-color: #555; color: white;" onclick="hideDetails()">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Inclure l'API Google Maps -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=VOTRE_CLE_API&callback=initMap" async defer></script>
+    
+    <script>
+        let map;
+        let marker;
+        
+        // Initialiser la carte Google Maps
+        function initMap() {
+            // Coordonnées par défaut pour Paris
+            const paris = { lat: 48.8566, lng: 2.3522 };
+            
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: paris,
+                zoom: 13,
+            });
+            
+            marker = new google.maps.Marker({
+                position: paris,
+                map: map,
+                title: "Position du client"
+            });
+        }
+        
+        // Fonction pour simuler la réception d'une nouvelle demande
+        function receiveNewRequest(requestData) {
+            // Dans une application réelle, cette fonction serait appelée via WebSocket ou polling
+            console.log("Nouvelle demande reçue:", requestData);
+            
+            // Ajouter la demande à la liste
+            const requestsList = document.getElementById('requests-list');
+            const requestCard = document.createElement('div');
+            requestCard.classList.add('request-card');
+            requestCard.id = `request-${requestData.id}`;
+            
+            requestCard.innerHTML = `
+                <div class="request-info">
+                    <h3>Demande de ${requestData.type} #${requestData.id}</h3>
+                    <p><strong>Date:</strong> ${requestData.timestamp}</p>
+                    <p><strong>Localisation:</strong> ${requestData.address || 'Coordonnées reçues'}</p>
+                </div>
+                <div class="request-actions">
+                    <button class="action-button view" onclick="viewRequest('${requestData.id}')">Voir</button>
+                    <button class="action-button accept" onclick="acceptRequest('${requestData.id}')">Accepter</button>
+                    <button class="action-button refuse" onclick="refuseRequest('${requestData.id}')">Refuser</button>
+                </div>
+            `;
+            
+            requestsList.prepend(requestCard);
+            
+            // Notification (si supportée par le navigateur)
+            if (Notification.permission === "granted") {
+                new Notification(`Nouvelle demande de ${requestData.type}`, {
+                    body: `Une nouvelle demande a été reçue. ID: ${requestData.id}`,
+                    icon: '/icon.png'
+                });
+            }
+        }
+        
+        // Changer d'onglet
+        function changeTab(tab) {
+            // Masquer tous les conteneurs
+            document.getElementById('new-requests').style.display = 'none';
+            document.getElementById('active-requests').style.display = 'none';
+            document.getElementById('history-requests').style.display = 'none';
+            
+            // Afficher le conteneur sélectionné
+            document.getElementById(`${tab}-requests`).style.display = 'block';
+            
+            // Mettre à jour les onglets actifs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            // Trouver l'onglet cliqué et le rendre actif
+            const clickedTab = Array.from(tabs).find(t => t.textContent.toLowerCase().includes(tab));
+            if (clickedTab) clickedTab.classList.add('active');
+        }
+        
+        // Voir les détails d'une demande
+        function viewRequest(id) {
+            document.getElementById('request-id').textContent = id;
+            document.getElementById('request-details').style.display = 'block';
+            
+            // Simulation de récupération des détails
+            const detailContent = document.getElementById('detail-content');
+            detailContent.innerHTML = `
+                <h3>Informations client</h3>
+                <p><strong>Identifiant:</strong> ${id}</p>
+                <p><strong>Date de demande:</strong> 06/04/2025 14:23</p>
+                <p><strong>Type de demande:</strong> ${id.startsWith('T') ? 'Taxi' : 'Commande Eden'}</p>
+                <p><strong>Coordonnées GPS:</strong> 48.8566, 2.3522</p>
+                <p><strong>Adresse estimée:</strong> ${id.startsWith('T') ? 'Rue de Rivoli, Paris' : 'Avenue des Champs-Élysées, Paris'}</p>
+            `;
+            
+            // Mettre à jour la carte
+            const location = id.startsWith('T') 
+                ? { lat: 48.8566, lng: 2.3522 }  // Coordonnées pour Taxi
+                : { lat: 48.8738, lng: 2.2950 }; // Coordonnées pour Eden
+                
+            updateMap(location);
+        }
+        
+        // Mettre à jour la position sur la carte
+        function updateMap(location) {
+            if (map && marker) {
+                map.setCenter(location);
+                marker.setPosition(location);
+            }
+        }
+        
+        // Accepter une demande
+        function acceptRequest(id) {
+            if (confirm(`Êtes-vous sûr de vouloir accepter la demande #${id}?`)) {
+                alert(`Demande #${id} acceptée avec succès!`);
+                // Déplacer vers les demandes actives
+                const requestCard = document.getElementById(`request-${id}`);
+                if (requestCard) {
+                    requestCard.remove();
+                    
+                    // Dans une application réelle, vous enverriez une confirmation au serveur
+                    // et ajouteriez la demande à la liste des demandes actives
+                }
+            }
+        }
+        
+        // Refuser une demande
+        function refuseRequest(id) {
+            if (confirm(`Êtes-vous sûr de vouloir refuser la demande #${id}?`)) {
+                alert(`Demande #${id} refusée.`);
+                // Supprimer de la liste
+                const requestCard = document.getElementById(`request-${id}`);
+                if (requestCard) {
+                    requestCard.remove();
+                }
+            }
+        }
+        
+        // Masquer les détails
+        function hideDetails() {
+            document.getElementById('request-details').style.display = 'none';
+        }
+        
+        // Demander la permission pour les notifications
+        function requestNotificationPermission() {
+            if (Notification && Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
+        }
+        
+        // Au chargement de la page
+        window.onload = function() {
+            // Demander la permission pour les notifications
+            requestNotificationPermission();
+            
+            // Dans une application réelle, vous établiriez une connexion WebSocket ici
+            // pour recevoir les nouvelles demandes en temps réel
+            
+            // Simuler la réception d'une nouvelle demande après quelques secondes
+            setTimeout(() => {
+                receiveNewRequest({
+                    id: 'T12346',
+                    type: 'taxi',
+                    timestamp: '06/04/2025 14:32',
+                    coordinates: { lat: 48.8744, lng: 2.3526 },
+                    address: 'Place de la République, Paris'
+                });
+            }, 5000);
+        };
+    </script>
+</body>
+</html>

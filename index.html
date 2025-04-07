@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatBot Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chat-container {
+            width: 350px;
+            height: 500px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: white;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        .bot-message {
+            background-color: #e6e6e6;
+            align-self: flex-start;
+            float: left;
+            clear: both;
+        }
+        .user-message {
+            background-color: #4CAF50;
+            color: white;
+            align-self: flex-end;
+            float: right;
+            clear: both;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .option-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .option-button:hover {
+            background-color: #45a049;
+        }
+        .location-form {
+            margin-top: 15px;
+            display: none;
+        }
+        .location-button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .location-button:hover {
+            background-color: #0b7dda;
+        }
+        .clear {
+            clear: both;
+        }
+        .confirmation {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            Assistant ChatBot
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <!-- Les messages seront ajoutés ici par JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Variables pour stocker les informations de localisation
+        let userLocation = null;
+
+        // Fonction pour ajouter un message
+        function addMessage(text, isBot = false) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.classList.add(isBot ? 'bot-message' : 'user-message');
+            messageElement.innerText = text;
+            messagesContainer.appendChild(messageElement);
+            
+            // Pour assurer que le défilement reste en bas
+            const clearDiv = document.createElement('div');
+            clearDiv.classList.add('clear');
+            messagesContainer.appendChild(clearDiv);
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Fonction pour afficher les options
+        function showOptions() {
+            const messagesContainer = document.getElementById('chat-messages');
+            const optionsDiv = document.createElement('div');
+            optionsDiv.classList.add('options');
+            
+            const options = [
+                { text: 'Commander un taxi', action: 'taxi' },
+                { text: 'Passer une commande chez Eden', action: 'eden' },
+                { text: "Besoin d'aide", action: 'help' }
+            ];
+            
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.classList.add('option-button');
+                button.innerText = option.text;
+                button.onclick = () => handleOptionClick(option.action);
+                optionsDiv.appendChild(button);
+            });
+            
+            messagesContainer.appendChild(optionsDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Fonction pour gérer le clic sur une option
+        function handleOptionClick(action) {
+            switch(action) {
+                case 'taxi':
+                    addMessage('Commander un taxi', false);
+                    setTimeout(() => {
+                        addMessage('Pour commander un taxi, nous avons besoin de votre localisation.', true);
+                        showLocationForm();
+                    }, 500);
+                    break;
+                case 'eden':
+                    addMessage('Passer une commande chez Eden', false);
+                    setTimeout(() => {
+                        addMessage("Pour passer une commande chez Eden, nous avons également besoin de votre localisation.", true);
+                        showLocationForm('eden');
+                    }, 500);
+                    break;
+                case 'help':
+                    addMessage("Besoin d'aide", false);
+                    setTimeout(() => {
+                        addMessage("Comment puis-je vous aider aujourd'hui?", true);
+                    }, 500);
+                    break;
+            }
+        }
+
+        // Fonction pour afficher le formulaire de localisation
+        function showLocationForm(service = 'taxi') {
+            const messagesContainer = document.getElementById('chat-messages');
+            
+            const locationFormDiv = document.createElement('div');
+            locationFormDiv.classList.add('location-form');
+            locationFormDiv.style.display = 'block';
+            
+            const explanation = document.createElement('p');
+            explanation.innerText = service === 'taxi' 
+                ? "Pourquoi la localisation? Votre localisation nous permet d'envoyer le taxi à l'endroit précis où vous vous trouvez."
+                : "Pourquoi la localisation? Votre localisation nous permet de vous livrer à l'adresse exacte où vous vous trouvez.";
+            locationFormDiv.appendChild(explanation);
+            
+            const locationButton = document.createElement('button');
+            locationButton.classList.add('location-button');
+            locationButton.innerText = 'Activer ma localisation';
+            locationButton.onclick = () => getLocation(service);
+            
+            locationFormDiv.appendChild(locationButton);
+            messagesContainer.appendChild(locationFormDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Fonction pour obtenir la localisation
+        function getLocation(service) {
+            if (navigator.geolocation) {
+                addMessage("Localisation en cours...", true);
+                
+                // Options de géolocalisation pour maximiser la précision, particulièrement sur mobile
+                const options = {
+                    enableHighAccuracy: true, // Utilise le GPS sur mobile si disponible
+                    timeout: 10000,          // Délai d'expiration en millisecondes
+                    maximumAge: 0            // N'utilise pas de positions en cache
+                };
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => showPosition(position, service),
+                    showError,
+                    options
+                );
+            } else {
+                addMessage("La géolocalisation n'est pas supportée par votre navigateur.", true);
+            }
+        }
+
+        // Fonction pour afficher la position et envoyer les données
+        function showPosition(position, service) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            const accuracy = position.coords.accuracy;
+            
+            userLocation = {
+                latitude: lat,
+                longitude: lon,
+                accuracy: accuracy,
+                timestamp: new Date().toISOString()
+            };
+            
+            addMessage(`Localisation obtenue! Précision: ~${Math.round(accuracy)} mètres`, true);
+            
+            // Envoi des données au serveur
+            sendLocationToServer(userLocation, service);
+        }
+
+        // Fonction pour envoyer la localisation au serveur
+        function sendLocationToServer(locationData, service) {
+            // Simuler un envoi au serveur (AJAX/fetch)
+            addMessage("Envoi de votre position au serveur...", true);
+            
+            // Dans une application réelle, ici vous utiliseriez fetch() ou XHR pour envoyer les données
+            // Exemple:
+            /*
+            fetch('https://votre-serveur.com/api/location', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    service: service,
+                    location: locationData
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                showConfirmation(service);
+            })
+            .catch((error) => {
+                addMessage("Erreur lors de l'envoi des données: " + error.message, true);
+            });
+            */
+            
+            // Simulation d'un délai réseau
+            setTimeout(() => {
+                showConfirmation(service);
+            }, 1500);
+        }
+
+        // Fonction pour afficher la confirmation
+        function showConfirmation(service) {
+            const messagesContainer = document.getElementById('chat-messages');
+            
+            // Créer un élément de confirmation
+            const confirmationDiv = document.createElement('div');
+            confirmationDiv.classList.add('confirmation');
+            
+            if (service === 'taxi') {
+                confirmationDiv.innerHTML = `
+                    <strong>Commande de taxi confirmée!</strong>
+                    <p>Un chauffeur a été notifié et arrivera bientôt à votre position.</p>
+                    <p>Temps d'attente estimé: 5-7 minutes</p>
+                `;
+            } else {
+                confirmationDiv.innerHTML = `
+                    <strong>Commande chez Eden confirmée!</strong>
+                    <p>Votre commande a été enregistrée.</p>
+                    <p>Temps de livraison estimé: 30-45 minutes</p>
+                `;
+            }
+            
+            messagesContainer.appendChild(confirmationDiv);
+            
+            // Ajouter un message du bot après la confirmation
+            setTimeout(() => {
+                addMessage("Avez-vous besoin d'autre chose?", true);
+                showOptions();
+            }, 2000);
+        }
+
+        // Fonction pour afficher les erreurs de géolocalisation
+        function showError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    addMessage("Vous avez refusé la demande de géolocalisation. Veuillez l'autoriser pour continuer.", true);
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    addMessage("Les informations de localisation sont indisponibles. Veuillez vérifier que votre GPS est activé.", true);
+                    break;
+                case error.TIMEOUT:
+                    addMessage("La demande de localisation a expiré. Veuillez réessayer.", true);
+                    break;
+                case error.UNKNOWN_ERROR:
+                    addMessage("Une erreur inconnue s'est produite. Veuillez réessayer.", true);
+                    break;
+            }
+            
+            // Afficher à nouveau les options principales
+            setTimeout(() => {
+                showOptions();
+            }, 2000);
+        }
+
+        // Au chargement de la page
+        window.onload = function() {
+            // Message de bienvenue
+            setTimeout(() => {
+                addMessage("Bienvenue à vous!", true);
+                setTimeout(() => {
+                    addMessage("Comment puis-je vous aider aujourd'hui?", true);
+                    showOptions();
+                }, 500);
+            }, 500);
+        };
+    </script>
+</body>
+</html>
